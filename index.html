@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset = "UTF-8">
+        <title>Face de quadra - QGIS</title>
+    </head>
+    <body>
+        <h1>Classificação viária para as Faces dos Lotes - QGIS</h1>
+            <h2>Ingredientes</h2>
+                <p>Utilizaremos os seguintes arquivos:</p>
+                    <li><a href="arquivos/class-viaria-cet.gpkg">class-viaria-cet</a></li>
+                    <li><a href="arquivos/setor-002-lotes.gpkg">setor-002-lotes</a></li>
+                <p>Abra os arquivos no QGIS conforme Imagem 1</p>
+                <p><img src="imagens/01-ingredientes.jpg" width="1440" height="780" alt="01-ingredientes"></p>
+                <p><strong>Imagem 1</strong></p>
+            <h2>Polígonos para Linhas</h2>
+                <p>Transformar os lotes que são polígonos para linhas, os atributos serão mantidos</p>
+                <p>Clique em <strong>Vetor>Geometrias>Polígonos para linhas...</strong>como ilustra a Imagem 2</p>
+                <p><img src="imagens/02-poli-to-line.jpg" width="1440" height="780" alt="02-poli-to-line"></p>
+                <p><strong>Imagem 2</strong></p>
+            <h2>Explosão das linhas</h2>
+                <p>As linhas geradas serão explodidas particionando em cada vértice, os atributos do polígono
+                original dos lotes será replicado a todas as linhas</p>
+                <p>Clique em <strong>Caixa de ferramentas de processamento>Geometria do vetor>Explodir linhas</strong></p>
+                <p><img src="imagens/03-explode-line.jpg" width="1440" height="780" alt="03-explode-line.jpg"></p>
+                <p><strong>Imagem 3</strong></p>
+            <h2>Ponto central das linhas</h2>
+                <p>Criar um ponto que fica no meio das linhas</p>
+                <p>Cliquem em <strong>Vetor>Geometrias>Centroides...</strong></p>
+                <p><img src="imagens/04-centroides-linhas.jpg" width="1440" height="780" alt="04-centroides-linhas"></p>
+                <p><strong>Imagem 4</strong></p>
+            <h2>Dissolver Lotes</h2>
+                <p>Voltando para os polígonos dos lotes, mais um processamento será aplicado sobre ele. Dissolvendo os polígonos do lote,
+                formando apenas uma quadra</p>
+                <p>Os próximos passos serão feitos para remover os pontos que ficam internamente das quadras, apenas os pontos mariginais, 
+                que ficam na parte externa, serão mantidos.</p>
+                <p>Clique em <strong>Vetor>Geoprocessamento>Dissolver</strong></p>
+                <p><img src="imagens/05-dissolver-lotes.jpg" width="1440" height="780" alt="05-dissolver-lotes"></p>
+                <p><strong>Imagem 5</strong></p>
+            <h2>Buffer interno</h2>
+                <p>A criação do Buffer interno é garantir que os pontos externo não sejam suprimidos, apenas os pontos internos.</p>
+                <p>Clique em <strong>Vetor>Geoprocessamento>Amortecimento</strong>. Valor de -0,20 metros a ser configurado
+                no campo <strong>Distância</strong>.</p>
+                <p><img src="imagens/06-buffer-interno.jpg" width="1440" height="780" alt="06-buffer-interno.jpg"></p>
+                <p><strong>Imagem 6</strong></p>
+            <h2>Remoção dos pontos internos</h2>
+                <p>Utilizar do buffer interno criado no passo anterior para selecionar os pontos dentro da quadra,
+                criados no passo Ponto central das linhas.</p>
+                <p>Clique em<strong>Vetor>Investigar>Selecionar por localização</strong></p>
+                <p>Selecionar OS PONTOS utilizando o BUFFER INTERNO criado, escolha a opção <strong>Interseccionam</strong></p>
+                <p><img src="imagens/07-remover-pontos-internos.jpg" width="1440" height="780" alt="07-remover-pontos-internos"></p>
+                <p><strong>Imagem 7</strong></p>
+            <h2>Linha de reta do ponto de face do lote até a linha de Logradouro com Classe viária</h2>
+                <p>Criar uma linha entre o elemento ponto da face do lote até a linha dos logradouros que possui o atributo de Classificação Viária.</p>
+                <p>Ressaltar que os atributos ainda não serão incorporados, apenas será criado o elemento vetorial.</p>
+                <p>Clique em <strong>Caixa de Ferramentas de processamento>GRASS>Vetor(v.*)>v.distance</strong></p>
+                <p>Selecione as opções <strong>'from' = pontos de faces de lote</strong> e <strong>'para' = logradouro com a Classificação Viária.</strong>
+                Para esse exemplo, a caixa <strong>Apenas feições selecionadas</strong> ficou marcada.
+                Na opção 'Upload' selecione <strong>to_along</strong>. Valores especifícados apenas o <strong>id</strong></p>
+                <p><img src="imagens/08-v.distance.jpg" width="1440" height="780" alt="08-v.distance"></p>
+                <p><strong>Imagem 8</strong></p>
+            <h2>Buffer na linha entre ponto das faces e logradouro</h2>
+                <p>Buffer sim de 20 cm para certificação a intersecção da linha de logradouro com o ponto de face de lote.</p>
+                <p><img src="imagens/09-buffer-conexao.jpg" width="1440" height="780" alt="09-buffer-conexao.jpg"></p>
+                <p><strong>Imagem 9</strong></p>
+            <h2>Associar os atributos</h2>
+                <p>Transferir os atributos do logradouro para o ponto de face de lote.
+                Será feito em duas etapas, primeiro do logradouro para o buffer da linha de conexão e depois do buffer para o ponto</p>
+                <p>Clique em <strong>Vetor>Gerenciar dados>Associar atributos porm local...</strong></p>
+                <p>Selecione a camada base o buffer Unir a camada de logradouros deixe o predicado geométrico <strong>Intersecta</strong> habilitado</p>
+                <p>Unir por tipo uma-a-uma (Tomar atributos apenas da primeirafeição coincidente></p>
+                <p> faça o procedimento semelhante para transferir os dados do buffer para o ponto</p>
+                <p><img src="imagens/10-logra-to-buffer.jpg" alt="10-logra-to-buffer" width="1440" height="780"></p>
+                <p><strong>Imagem 10</strong></p>
+                <p><img src="imagens/11-buffer-to-pontofacelote.jpg" alt="11-buffer-to-pontofacelote" width="1440" height="780"></p>
+                <p><strong>Imagem 11</strong></p>
+            <h2>Agrupar por atributos</h2>
+                <p>Utilizar o mesmo comando de Dissolver, agora é importante agrupar por atributos:</p>
+                    <li>Setor fiscal</li>
+                    <li>Quadra fiscal</li>
+                    <li>Condomínio</li>
+                    <li>Tipo lote</li>
+                    <li>Logradouro</li>
+                    <li>Lote</li>
+                <p><img src="imagens/12-dissolver-por-s-q-cond-tipo-lote-codlog.jpg" alt="12-dissolver-por-s-q-cond-tipo-lote-codlog" width="1440" height="780"></p>
+                <p><strong>Imagem 12</strong></p>
+            <h2>Resultado</h2>
+                <p>Na imagem abaixo, os pontos estão com os mesmos nomes das ruas com as faces mais próximas,
+                bem como a classe viária representada pelas mesmas cores</p>
+                <p>Mais de um ponto pode estar posicionado para o mesmo logradouro, mas apenas um registro (linha) é contabilizada no banco.</p>
+                <P><a href="resultados/setor-002-classvia-por-facelote.zip">Download Resultado</a></p>
+                <p><img src="imagens/13-final.jpg" alt="13-final" width="1440" height="780"></p>
+                <p><strong>Imagem 13</strong></p>
+    </body>
+</html>
